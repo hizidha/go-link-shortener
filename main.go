@@ -15,7 +15,7 @@ import (
 var (
 	hashID *hashids.HashID
 	urlMap map[string]string
-	port   string = ":3906"
+	port   string = ":8080"
 	host   string = "http://localhost" + port + "/"
 )
 
@@ -42,7 +42,8 @@ func shortenURL(w http.ResponseWriter, r *http.Request) {
 	// Generate a unique short code based on the longURL
 	// Generate a random number for unique ID
 	rand.Seed(time.Now().UnixNano())
-	randomID := rand.Intn(100000000) // Generates a random number between 0 and 99999999
+	// Generates a random number between 0 and 99999999
+	randomID := rand.Intn(100000000)
 
 	shortID, _ := hashID.Encode([]int{randomID})
 
@@ -74,8 +75,8 @@ func main() {
 	hashID, _ = hashids.New()
 
 	r := mux.NewRouter()
-
 	r.HandleFunc("/", welcomeHandler).Methods("GET")
+
 	r.HandleFunc("/shorten", shortenURL).Methods("POST")
 	r.HandleFunc("/{shortURL}", redirectURL).Methods("GET")
 
