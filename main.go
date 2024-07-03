@@ -15,7 +15,7 @@ import (
 var (
 	hashID *hashids.HashID
 	urlMap map[string]string
-	port   string = ":8080"
+	port   string = ":3906"
 	host   string = "http://localhost" + port + "/"
 )
 
