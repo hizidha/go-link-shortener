@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "5397e6ef-13e0-47d7-a8a3-53ba0e648e92",
 		"name": "Shortened Link",
-		"description": "StartFragmentThe \"Shortened Link\" project is built using Go ([Golang](https://go.dev/)) programming language and [MongoDB](https://www.mongodb.com/docs/). It allows users to shorten long URLs into unique, short codes that redirect to the original URLs. This tutorial outlines the steps to set up and run the project locally.",
+		"description": "The \"Shortened Link\" project is built using Go ([Golang](https://go.dev/)) programming language and [MongoDB](https://www.mongodb.com/docs/). It allows users to shorten long URLs into unique, short codes that redirect to the original URLs. This tutorial outlines the steps to set up and run the project locally.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
 		"_exporter_id": "26553466"
 	},
