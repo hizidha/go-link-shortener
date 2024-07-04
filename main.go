@@ -1,85 +1,60 @@
 package main
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
 	"log"
-	"math/rand"
 	"net/http"
-	"time"
+	"os"
+
+	"shorted-link/handlers"
+	"shorted-link/utils"
 
 	"github.com/gorilla/mux"
-	"github.com/speps/go-hashids"
+	"github.com/joho/godotenv"
 )
 
 var (
-	hashID *hashids.HashID
-	urlMap map[string]string
-	port   string = ":8080"
-	host   string = "http://localhost" + port + "/"
+	port   string // Default port
+	domain string // Domain from .env
 )
 
-type ShortenRequest struct {
-	URL string `json:"url"`
-}
-
-func shortenURL(w http.ResponseWriter, r *http.Request) {
-	var req ShortenRequest
-
-	// Decode JSON body
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		http.Error(w, "Invalid JSON body", http.StatusBadRequest)
-		return
-	}
-
-	longURL := req.URL
-	if longURL == "" {
-		http.Error(w, "URL cannot be empty", http.StatusBadRequest)
-		return
-	}
-
-	// Generate a unique short code based on the longURL
-	// Generate a random number for unique ID
-	rand.Seed(time.Now().UnixNano())
-	// Generates a random number between 0 and 99999999
-	randomID := rand.Intn(100000000)
-
-	shortID, _ := hashID.Encode([]int{randomID})
-
-	shortURL := fmt.Sprintf("%s%s", host, shortID)
-	urlMap[shortID] = longURL
-
-	fmt.Fprintf(w, "Shortened URL: %s", shortURL)
-}
-
-func redirectURL(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	shortID := vars["shortURL"]
-
-	longURL, found := urlMap[shortID]
-	if !found {
-		http.NotFound(w, r)
-		return
-	}
-
-	http.Redirect(w, r, longURL, http.StatusFound)
-}
-
-func welcomeHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome to GoLang!")
-}
-
 func main() {
-	urlMap = make(map[string]string)
-	hashID, _ = hashids.New()
+	// Load environment variables from .env file
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
+	// Accessing environment variables
+	domain = os.Getenv("DOMAIN")
+	port = os.Getenv("PORT")
+	if domain == "" || port == "" {
+		log.Fatal("DOMAIN or PORT not set in .env file")
+	}
+
+	// Connect to MongoDB
+	client, err := utils.ConnectToMongoDB()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Disconnect(context.Background())
+
+	// Set MongoDB collection for handlers
+	urlCollection := client.Database("go").Collection("shortenedLink")
+	handlers.SetURLCollection(urlCollection)
+
+	// Initialize router
 	r := mux.NewRouter()
-	r.HandleFunc("/", welcomeHandler).Methods("GET")
 
-	r.HandleFunc("/shorten", shortenURL).Methods("POST")
-	r.HandleFunc("/{shortURL}", redirectURL).Methods("GET")
+	// Define routes
+	r.HandleFunc("/", handlers.WelcomeHandler).Methods("GET")
+	r.HandleFunc("/shorten", handlers.ShortenURL).Methods("POST")
+	r.HandleFunc("/{shortURL}", handlers.RedirectURL).Methods("GET")
 
-	fmt.Println("Running at", host)
-	log.Fatal(http.ListenAndServe(port, r))
+	// Start server
+	serverAddr := fmt.Sprintf("%s:%s", domain, port)
+	serverPrint := fmt.Sprintf("http://%s", serverAddr)
+	fmt.Println("Running at", serverPrint)
+	log.Fatal(http.ListenAndServe(serverAddr, r))
 }

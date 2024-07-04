@@ -23,13 +23,15 @@ go mod init shorted-link
 go mod tidy
 ```
 
-#### 3. Execute the Project
+#### 3. Activate MongoDB Compass on [localhost:27017](http://localhost:27017)
+
+#### 4. Execute the Project
 Run the following command to start the server:
 ```bash
 go run .
 ```
 
-#### 4. Access the Link Shortener
+#### 5. Access the Link Shortener
 Open your web browser and navigate to:
 ```bash
 http://localhost:8080/
