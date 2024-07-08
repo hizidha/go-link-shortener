@@ -13,7 +13,7 @@ Here are the steps to get your Go project up and running:
 
 ```bash
 git clone https://github.com/hizidha/go-link-shortener.git
-cd shorted-link-with-go
+cd link-shortener-go-master
 ```
 
 #### 2. Install Dependencies
